@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;500;700&display=swap');
+body{font-family:'Share Tech Mono',monospace;background:#020a14;color:#7ecfff;padding:1.5rem 1rem;min-height:100vh;position:relative;overflow-x:hidden}
+#stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.content{position:relative;z-index:1}
+h1{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;color:#7ecfff;text-align:center;margin-bottom:0.25rem;letter-spacing:3px;text-transform:uppercase;text-shadow:0 0 20px rgba(126,207,255,0.5)}
+.subtitle{text-align:center;font-size:11px;color:#2a6080;letter-spacing:4px;margin-bottom:2rem;text-transform:uppercase}
+.panel{border:1px solid #0d3a54;border-radius:4px;padding:1.25rem;margin-bottom:1.25rem;background:rgba(2,15,28,0.8);position:relative}
+.panel::before{content:'';position:absolute;top:-1px;left:16px;right:16px;height:1px;background:linear-gradient(90deg,transparent,#7ecfff44,transparent)}
+.panel-label{font-size:10px;letter-spacing:3px;color:#2a6080;text-transform:uppercase;margin-bottom:1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:1rem}
+label{display:block;font-size:10px;letter-spacing:2px;color:#2a8caa;text-transform:uppercase;margin-bottom:6px}
+input{width:100%;background:#020f1c;border:1px solid #0d3a54;border-radius:2px;color:#7ecfff;font-family:'Share Tech Mono',monospace;font-size:14px;padding:8px 10px;outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus{border-color:#7ecfff44;box-shadow:0 0 12px rgba(126,207,255,0.1)}
+input[readonly]{color:#2a6080;cursor:default}
+input::placeholder{color:#1a4a60}
+.boost-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end}
+.sep{display:flex;align-items:flex-end;padding-bottom:10px;font-size:16px;color:#2a6080;justify-content:center}
+.rarity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.rarity-toggle{border:1px solid #0d3a54;border-radius:2px;padding:10px 10px 8px;cursor:pointer;background:#020f1c;transition:all .2s;user-select:none}
+.rarity-toggle.active-shiny{border-color:#f0c040;background:rgba(240,192,64,0.07)}
+.rarity-toggle.active-mythic{border-color:#b06aff;background:rgba(176,106,255,0.07)}
+.rarity-toggle.active-shinymythic{border-color:#ff6aaa;background:rgba(255,106,170,0.07)}
+.rarity-name{font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.rarity-name.shiny{color:#f0c040}
+.rarity-name.mythic{color:#b06aff}
+.rarity-name.shinymythic{color:#ff6aaa}
+.rarity-chance{font-size:13px;font-family:'Orbitron',sans-serif}
+.rarity-sub{font-size:9px;color:#2a6080;margin-top:3px}
+.rarity-toggle.active-shiny .rarity-chance{color:#f0c040}
+.rarity-toggle.active-mythic .rarity-chance{color:#b06aff}
+.rarity-toggle.active-shinymythic .rarity-chance{color:#ff6aaa}
+.rarity-toggle:not(.active-shiny):not(.active-mythic):not(.active-shinymythic) .rarity-chance{color:#2a6080}
+.rarity-toggle:not(.active-shiny):not(.active-mythic):not(.active-shinymythic) .rarity-name{color:#2a6080}
+.check{float:right;font-size:12px;opacity:0}
+.rarity-toggle.active-shiny .check,.rarity-toggle.active-mythic .check,.rarity-toggle.active-shinymythic .check{opacity:1}
+.calc-btn{display:block;width:100%;padding:12px;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:500;letter-spacing:3px;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid #7ecfff44;border-radius:2px;color:#7ecfff;margin-bottom:1.25rem;transition:all .2s;position:relative;overflow:hidden}
+.calc-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(126,207,255,0.06),transparent);transform:translateX(-100%);transition:transform .4s}
+.calc-btn:hover{border-color:#7ecfff88;box-shadow:0 0 20px rgba(126,207,255,0.1);color:#fff}
+.calc-btn:hover::before{transform:translateX(100%)}
+.calc-btn:active{transform:scale(0.99)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:1.25rem}
+.card{background:#020f1c;border:1px solid #0d3a54;border-radius:2px;padding:10px 12px;position:relative}
+.card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#7ecfff22,transparent)}
+.card.shiny{border-color:#f0c04044}
+.card.shiny::after{background:linear-gradient(90deg,transparent,#f0c04033,transparent)}
+.card.mythic{border-color:#b06aff44}
+.card.mythic::after{background:linear-gradient(90deg,transparent,#b06aff33,transparent)}
+.card.shinymythic{border-color:#ff6aaa44}
+.card.shinymythic::after{background:linear-gradient(90deg,transparent,#ff6aaa33,transparent)}
+.card-label{font-size:9px;letter-spacing:2px;color:#2a6080;text-transform:uppercase;margin-bottom:6px}
+.card-val{font-size:18px;font-weight:500;color:#7ecfff;font-family:'Orbitron',sans-serif;word-break:break-all}
+.card.shiny .card-val{color:#f0c040}
+.card.mythic .card-val{color:#b06aff}
+.card.shinymythic .card-val{color:#ff6aaa}
+.card-sub{font-size:10px;color:#1a4a60;margin-top:4px}
+.chart-wrap{position:relative;height:220px;margin-bottom:1.25rem}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{text-align:left;color:#2a6080;font-weight:400;padding:6px 8px;border-bottom:1px solid #0d3a54;letter-spacing:2px;font-size:10px;text-transform:uppercase}
+td{padding:7px 8px;border-bottom:1px solid #060f1a;color:#5ab8e0}
+tr:hover td{background:rgba(126,207,255,0.03)}
+tr.highlight td{color:#7ecfff;background:rgba(126,207,255,0.05)}
+tr.highlight td:first-child::before{content:'▶ ';color:#7ecfff}
+.err{font-size:12px;color:#e24b4a;margin-bottom:1rem;display:none;letter-spacing:1px}
+.scanline{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)}
+.corner{position:absolute;width:12px;height:12px;border-color:#7ecfff33;border-style:solid}
+.tl{top:8px;left:8px;border-width:1px 0 0 1px}
+.tr{top:8px;right:8px;border-width:1px 1px 0 0}
+.bl{bottom:8px;left:8px;border-width:0 0 1px 1px}
+.br{bottom:8px;right:8px;border-width:0 1px 1px 0}
+</style>
+
+<canvas id="stars"></canvas>
+<div class="scanline"></div>
+
+<div class="content">
+  <h2 class="sr-only"></h2>
+  <h1>Probability Engine</h1>
+  <div class="subtitle">Crate Hunt Analysis System v2.4</div>
+
+  <div class="panel">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="panel-label">Crate Hunt parameters</div>
+    <div class="grid">
+      <div>
+        <label>Base probability</label>
+        <input type="text" id="prob" placeholder="1/100m, 0.001, 5%" value="1/100m">
+      </div>
+      <div>
+        <label>Roll count</label>
+        <input type="text" id="rolls" placeholder="1000, 5k, 2m" value="">
+      </div>
+    </div>
+    <div class="boost-row" style="margin-bottom:1.25rem">
+      <div>
+        <label>Luck multiplier</label>
+        <input type="text" id="boost" placeholder="200%, 50x, 2.5x" value="">
+      </div>
+      <div class="sep">→</div>
+      <div>
+        <label>Boosted probability</label>
+        <input type="text" id="boosted-display" readonly placeholder="—">
+      </div>
+    </div>
+
+    <label style="margin-bottom:8px">Rarity modifier (stacks on probability)</label>
+    <div class="rarity-grid">
+      <div class="rarity-toggle" id="tog-shiny" onclick="toggleRarity('shiny')">
+        <span class="check" style="color:#f0c040">✓</span>
+        <div class="rarity-name shiny">✦ Shiny</div>
+        <div class="rarity-chance">1/40</div>
+        <div class="rarity-sub">click to toggle</div>
+      </div>
+      <div class="rarity-toggle" id="tog-mythic" onclick="toggleRarity('mythic')">
+        <span class="check" style="color:#b06aff">✓</span>
+        <div class="rarity-name mythic">◈ Mythic</div>
+        <div class="rarity-chance">1/100</div>
+        <div class="rarity-sub">click to toggle</div>
+      </div>
+      <div class="rarity-toggle" id="tog-shinymythic" onclick="toggleRarity('shinymythic')">
+        <span class="check" style="color:#ff6aaa">✓</span>
+        <div class="rarity-name shinymythic">❋ Shiny Mythic</div>
+        <div class="rarity-chance">1/4000</div>
+        <div class="rarity-sub">shiny × mythic</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="err" id="err">⚠ Invalid input — check probability or boost value.</div>
+  <button class="calc-btn" onclick="calculate()">[ Calculate Odds ]</button>
+
+  <div id="results" style="display:none">
+    <div class="cards" id="stat-cards"></div>
+    <div class="panel">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="panel-label">Success probability curve</div>
+      <div class="chart-wrap"><canvas id="chart" role="img" aria-label="Curve showing probability of success vs number of rolls"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="panel-label">Crate Hunt milestones</div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Milestone</th><th>Rolls required</th><th>Probability</th></tr></thead>
+        <tbody id="milestone-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+(function(){
+  const c=document.getElementById('stars');
+  const ctx=c.getContext('2d');
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  const stars=Array.from({length:200},()=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:Math.random()*1.2+0.2,a:Math.random(),da:(Math.random()-0.5)*0.005+0.002,speed:Math.random()*0.15+0.05}));
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(const s of stars){
+      s.a+=s.da;if(s.a>1||s.a<0)s.da*=-1;
+      s.y+=s.speed;if(s.y>c.height){s.y=0;s.x=Math.random()*c.width}
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(126,207,255,${s.a*0.7})`;ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+let chartInst=null;
+const rarities={shiny:{active:false,chance:1/40,label:'Shiny',cls:'shiny'},mythic:{active:false,chance:1/100,label:'Mythic',cls:'mythic'},shinymythic:{active:false,chance:1/4000,label:'Shiny Mythic',cls:'shinymythic'}};
+
+function toggleRarity(key){
+  rarities[key].active=!rarities[key].active;
+  const el=document.getElementById('tog-'+key);
+  el.classList.toggle('active-'+key,rarities[key].active);
+  boostUpdate();
+}
+
+function parseProb(s){
+  s=s.trim().toLowerCase();
+  if(s.endsWith('%'))return parseFloat(s)/100;
+  if(s.includes('/')){const[a,b]=s.split('/').map(v=>parseNum(v));if(!isFinite(a)||!isFinite(b)||b===0)return null;return a/b}
+  const n=parseNum(s);return isFinite(n)?n:null;
+}
+function parseNum(s){
+  s=s.trim().toLowerCase();
+  const sfx={k:1e3,m:1e6,b:1e9,t:1e12,qd:1e15};
+  for(const[k,v]of Object.entries(sfx)){if(s.endsWith(k))return parseFloat(s)*v}
+  return parseFloat(s);
+}
+function parseBoost(s){
+  s=s.trim().toLowerCase();if(!s)return 1;
+  if(s.endsWith('%')){return 1+parseFloat(s)/100}
+  if(s.endsWith('x'))return parseFloat(s);
+  const n=parseFloat(s);return isFinite(n)?n:null;
+}
+function fmtNum(n){
+  if(n>=1e15)return(n/1e15).toFixed(2)+'QD';
+  if(n>=1e12)return(n/1e12).toFixed(2)+'T';
+  if(n>=1e9)return(n/1e9).toFixed(2)+'B';
+  if(n>=1e6)return(n/1e6).toFixed(2)+'M';
+  if(n>=1e3)return(n/1e3).toFixed(1)+'K';
+  return Math.round(n).toLocaleString();
+}
+function fmtProb(p){
+  if(p>=0.01)return(p*100).toFixed(4)+'%';
+  return'1 in '+fmtNum(Math.round(1/p));
+}
+function pAtLeastOne(p,n){if(n>1e15)return 1;return 1-Math.pow(1-p,n)}
+function rollsForProb(p,target){return Math.ceil(Math.log(1-target)/Math.log(1-p))}
+
+function getEffectiveProb(base,boost){
+  let p=Math.min(1,base*boost);
+  for(const r of Object.values(rarities)){if(r.active)p*=r.chance}
+  return p;
+}
+
+function boostUpdate(){
+  const p=parseProb(document.getElementById('prob').value);
+  const b=parseBoost(document.getElementById('boost').value);
+  const el=document.getElementById('boosted-display');
+  if(p&&b){el.value=fmtProb(getEffectiveProb(p,b))}else{el.value='—'}
+}
+
+document.getElementById('prob').addEventListener('input',boostUpdate);
+document.getElementById('boost').addEventListener('input',boostUpdate);
+
+function activeRarityLabel(){
+  const active=Object.values(rarities).filter(r=>r.active).map(r=>r.label);
+  if(!active.length)return null;
+  return active.join(' + ');
+}
+
+function calculate(){
+  const errEl=document.getElementById('err');
+  errEl.style.display='none';
+  const baseP=parseProb(document.getElementById('prob').value);
+  const boostStr=document.getElementById('boost').value;
+  const rollsStr=document.getElementById('rolls').value.trim();
+  const boost=parseBoost(boostStr);
+  if(!baseP||!isFinite(baseP)||baseP<=0||baseP>1){errEl.style.display='block';errEl.textContent='⚠ Invalid probability.';return}
+  if(boost===null){errEl.style.display='block';errEl.textContent='⚠ Invalid luck boost.';return}
+
+  const bp=Math.min(1,baseP*boost);
+  const fp=getEffectiveProb(baseP,boost);
+  const mean=Math.round(1/fp);
+  const coinflip=rollsForProb(fp,0.5);
+  const p999=rollsForProb(fp,0.999);
+  const userRolls=rollsStr?parseNum(rollsStr):null;
+  const userProb=userRolls?pAtLeastOne(fp,userRolls):null;
+  const rarLabel=activeRarityLabel();
+  const rarCls=rarities.shinymythic.active?'shinymythic':rarities.mythic.active?'mythic':rarities.shiny.active?'shiny':'';
+
+  const cards=[
+    {label:'Base chance',val:fmtProb(baseP),sub:'per roll',cls:''},
+    {label:'After boost',val:fmtProb(bp),sub:boostStr||'no boost',cls:''},
+  ];
+  if(rarLabel) cards.push({label:rarLabel,val:fmtProb(fp),sub:'effective chance',cls:rarCls});
+  cards.push({label:'Expected',val:fmtNum(mean),sub:'avg rolls for 1',cls:rarCls||''});
+  cards.push({label:'Coinflip',val:fmtNum(coinflip),sub:'rolls for 50%',cls:rarCls||''});
+  if(userProb!==null)cards.push({label:'Your '+fmtNum(userRolls)+' rolls',val:(userProb*100).toFixed(2)+'%',sub:'success chance',cls:rarCls||''});
+
+  document.getElementById('stat-cards').innerHTML=cards.map(c=>
+    `<div class="card${c.cls?' '+c.cls:''}"><div class="card-label">${c.label}</div><div class="card-val">${c.val}</div><div class="card-sub">${c.sub}</div></div>`
+  ).join('');
+
+  const milestones=[
+    {label:'25% chance',pct:0.25,rolls:rollsForProb(fp,0.25)},
+    {label:'50% — coinflip',pct:0.50,rolls:coinflip},
+    {label:'75% chance',pct:0.75,rolls:rollsForProb(fp,0.75)},
+    {label:'90% chance',pct:0.90,rolls:rollsForProb(fp,0.90)},
+    {label:'99% chance',pct:0.99,rolls:rollsForProb(fp,0.99)},
+    {label:'99.9% chance',pct:0.999,rolls:p999},
+  ];
+  if(userRolls)milestones.push({label:'Your rolls',pct:userProb,rolls:userRolls,highlight:true});
+  milestones.sort((a,b)=>a.rolls-b.rolls);
+
+  document.getElementById('milestone-body').innerHTML=milestones.map(m=>
+    `<tr${m.highlight?' class="highlight"':''}><td>${m.label}</td><td>${fmtNum(m.rolls)}</td><td>${(m.pct*100).toFixed(2)}%</td></tr>`
+  ).join('');
+
+  buildChart(fp,userRolls,userProb,p999,rarCls);
+  document.getElementById('results').style.display='block';
+}
+
+function buildChart(p,userRolls,userProb,p999,rarCls){
+  const maxRolls=Math.min(p999*1.5,1e15);
+  const pts=120,step=maxRolls/pts;
+  const labels=[],data=[];
+  for(let i=1;i<=pts;i++){const n=step*i;labels.push(n);data.push(pAtLeastOne(p,n)*100)}
+  if(chartInst){chartInst.destroy();chartInst=null}
+  const lineColor=rarCls==='shinymythic'?'#ff6aaa':rarCls==='mythic'?'#b06aff':rarCls==='shiny'?'#f0c040':'#7ecfff';
+  const fillColor=rarCls==='shinymythic'?'rgba(255,106,170,0.07)':rarCls==='mythic'?'rgba(176,106,255,0.07)':rarCls==='shiny'?'rgba(240,192,64,0.07)':'rgba(126,207,255,0.06)';
+  const datasets=[{label:'Success chance',data,borderColor:lineColor,backgroundColor:fillColor,fill:true,tension:0.4,pointRadius:0,borderWidth:1.5}];
+  if(userRolls){
+    const idx=labels.findIndex(l=>l>=userRolls);
+    if(idx>=0)datasets.push({label:'Your position',data:labels.map((_,i)=>i===idx?(userProb*100):null),borderColor:'#D4537E',pointBackgroundColor:'#D4537E',pointRadius:labels.map((_,i)=>i===idx?6:0),pointHoverRadius:8,showLine:false,spanGaps:false});
+  }
+  chartInst=new Chart(document.getElementById('chart'),{
+    type:'line',
+    data:{labels:labels.map(l=>fmtNum(l)),datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(2,15,28,0.95)',borderColor:'#0d3a54',borderWidth:1,titleColor:'#7ecfff',bodyColor:'#5ab8e0',callbacks:{title:i=>i[0].label+' rolls',label:i=>`${i.raw!==null?i.raw.toFixed(2)+'% chance':''}`}}},
+      scales:{
+        x:{ticks:{maxTicksLimit:8,color:'#2a6080',font:{size:10,family:'Share Tech Mono'}},grid:{color:'rgba(13,58,84,0.5)'},border:{display:false}},
+        y:{min:0,max:100,ticks:{color:'#2a6080',font:{size:10,family:'Share Tech Mono'},callback:v=>v+'%'},grid:{color:'rgba(13,58,84,0.5)'},border:{display:false}}
+      }
+    }
+  });
+  const annots=[{pct:50,color:'#378ADD',label:'50%'},{pct:90,color:'#1D9E75',label:'90%'},{pct:99,color:'#BA7517',label:'99%'}];
+  if(userRolls)annots.push({pct:userProb*100,color:'#D4537E',label:'you'});
+  chartInst.options.animation={onComplete:()=>{
+    const ctx2=chartInst.ctx,xS=chartInst.scales.x,yS=chartInst.scales.y;
+    ctx2.save();
+    annots.forEach(a=>{
+      const rolls=a.label==='you'?userRolls:rollsForProb(p,a.pct/100);
+      const idx=labels.findIndex(l=>l>=rolls);if(idx<0)return;
+      const x=xS.getPixelForValue(idx),y=yS.getPixelForValue(a.pct);
+      ctx2.strokeStyle=a.color;ctx2.lineWidth=1;ctx2.setLineDash([3,3]);ctx2.globalAlpha=0.6;
+      ctx2.beginPath();ctx2.moveTo(x,yS.getPixelForValue(0));ctx2.lineTo(x,y);ctx2.stroke();
+      ctx2.setLineDash([]);ctx2.globalAlpha=1;ctx2.fillStyle=a.color;ctx2.font='10px Share Tech Mono';
+      ctx2.fillText(a.label,x+3,y-4);
+    });
+    ctx2.restore();
+  }};
+  chartInst.update();
+}
+
+window.addEventListener('keydown',e=>{if(e.key==='Enter')calculate()});
+boostUpdate();
+</script>
